@@ -3,19 +3,25 @@
     android:orientation="vertical"
     android:padding="16dp"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:layout_marginBottom="8dp">
 
     <TextView
         android:id="@+id/actividadNombre"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Nombre de la actividad"
-        android:textSize="18sp" />
+        android:textColor="@color/textColorPrimary"
+        android:textSize="18sp"
+        android:fontFamily="sans-serif-medium"/>
 
     <TextView
         android:id="@+id/actividadDescripcion"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Descripción"
+        android:textColor="@color/textColorSecondary"
         android:textSize="14sp" />
 </LinearLayout>
+
