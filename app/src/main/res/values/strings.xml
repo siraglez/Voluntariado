@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Voluntariado</string>
+    <string name="inicio_sesion">Inicio de Sesión</string>
+    <string name="registro">Registro</string>
+    <string name="detalles_actividad">Detalles de la Actividad</string>
 </resources>
