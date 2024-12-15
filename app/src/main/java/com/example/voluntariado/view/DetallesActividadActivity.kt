@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.voluntariado.R
 import com.example.voluntariado.model.Actividad
 import com.example.voluntariado.model.Inscripcion
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
@@ -31,10 +32,6 @@ class DetallesActividadActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detalles_actividad)
 
-        // Obtener los detalles de la actividad desde el Intent
-        val actividadId = intent.getStringExtra("ACTIVIDAD_ID") ?: return
-        obtenerDetallesActividad(actividadId)
-
         // Referencias a los elementos de la UI
         tvCategoria = findViewById(R.id.tvCategoria)
         tvDescripcion = findViewById(R.id.tvDescripcion)
@@ -47,17 +44,23 @@ class DetallesActividadActivity : AppCompatActivity() {
         btnInscribirse = findViewById(R.id.btnInscribirse)
         btnVolver = findViewById(R.id.btnVolver)
 
-        // Cargar los detalles de la actividad
-        cargarDetallesActividad()
+        // Obtener los detalles de la actividad desde el Intent
+        val actividadId = intent.getStringExtra("ACTIVIDAD_ID") ?: return
+        obtenerDetallesActividad(actividadId)
 
         // Acción para inscribirse
         btnInscribirse.setOnClickListener {
-            inscribirseEnActividad()
+            val usuarioId = FirebaseAuth.getInstance().currentUser?.uid
+            if (usuarioId != null) {
+                inscribirseEnActividad(usuarioId)
+            } else {
+                Toast.makeText(this, "Debe iniciar sesión para inscribirse", Toast.LENGTH_SHORT).show()
+            }
         }
 
         // Acción para volver a la lista
         btnVolver.setOnClickListener {
-            finish()  // Vuelve a la actividad anterior
+            finish() // Vuelve a la actividad anterior
         }
     }
 
@@ -66,10 +69,17 @@ class DetallesActividadActivity : AppCompatActivity() {
             .document(id)
             .get()
             .addOnSuccessListener { document ->
-                if (document != null) {
+                if (document != null && document.exists()) {
                     actividad = document.toObject(Actividad::class.java)!!
                     cargarDetallesActividad()
+                } else {
+                    Toast.makeText(this, "Actividad no encontrada", Toast.LENGTH_SHORT).show()
+                    finish()
                 }
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Error al obtener los detalles", Toast.LENGTH_SHORT).show()
+                finish()
             }
     }
 
@@ -83,7 +93,7 @@ class DetallesActividadActivity : AppCompatActivity() {
         tvInscritos.text = actividad.inscritos.joinToString(", ")
     }
 
-    private fun inscribirseEnActividad(actividad: Actividad, usuarioId: String) {
+    private fun inscribirseEnActividad(usuarioId: String) {
         if (actividad.voluntariosActuales < actividad.voluntariosMax) {
             val db = FirebaseFirestore.getInstance()
 
@@ -105,13 +115,18 @@ class DetallesActividadActivity : AppCompatActivity() {
                     )
                     db.collection("inscripciones").add(nuevaInscripcion)
                         .addOnSuccessListener {
-                            // Actualizar la lista de inscripciones del usuario
                             db.collection("usuarios").document(usuarioId)
                                 .update("inscripciones", FieldValue.arrayUnion(it.id))
                                 .addOnSuccessListener {
                                     Toast.makeText(this, "Te has inscrito correctamente", Toast.LENGTH_SHORT).show()
                                 }
                         }
+                        .addOnFailureListener {
+                            Toast.makeText(this, "Error al guardar la inscripción", Toast.LENGTH_SHORT).show()
+                        }
+                }
+                .addOnFailureListener {
+                    Toast.makeText(this, "Error al actualizar la actividad", Toast.LENGTH_SHORT).show()
                 }
         } else {
             Toast.makeText(this, "No hay más espacio en esta actividad", Toast.LENGTH_SHORT).show()
@@ -123,5 +138,4 @@ class DetallesActividadActivity : AppCompatActivity() {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         return dateFormat.format(Date())
     }
-
 }
