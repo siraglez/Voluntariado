@@ -10,5 +10,5 @@ data class Actividad(
     val voluntariosMax: Int = 0,
     var voluntariosActuales: Int = 0,
     val estado: String = "",
-    var inscritos: List<String> = listOf()
+    var inscritos: List<String> = emptyList()
 )

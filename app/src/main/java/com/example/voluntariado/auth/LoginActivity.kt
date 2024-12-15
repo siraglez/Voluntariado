@@ -7,7 +7,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.voluntariado.R
-import com.example.voluntariado.auth.RegistroActivity
+import com.example.voluntariado.view.MainActivity
 
 class LoginActivity : AppCompatActivity() {
 
@@ -40,7 +40,9 @@ class LoginActivity : AppCompatActivity() {
         authHelper.iniciarSesion(email, password) { user ->
             if (user != null) {
                 Toast.makeText(this, "Bienvenido de nuevo", Toast.LENGTH_SHORT).show()
-                // Lógica para navegar a MainActivity
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+                finish()
             } else {
                 Toast.makeText(this, "Error al iniciar sesión", Toast.LENGTH_SHORT).show()
             }

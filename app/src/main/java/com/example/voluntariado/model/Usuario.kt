@@ -5,6 +5,6 @@ data class Usuario(
     val nombre: String = "",
     val email: String = "",
     val ubicacion: String = "",
-    val intereses: List<String> = listOf(),
-    val inscripciones: List<String> = listOf()
+    val intereses: List<String> = emptyList(),
+    val inscripciones: List<String> = emptyList()
 )

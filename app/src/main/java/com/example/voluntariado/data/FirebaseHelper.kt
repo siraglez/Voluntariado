@@ -1,5 +1,6 @@
 package com.example.voluntariado.data
 
+import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.voluntariado.model.Usuario
 import com.example.voluntariado.model.Actividad
@@ -11,8 +12,16 @@ class FirebaseHelper {
 
     // Función para agregar un usuario
     fun agregarUsuario(usuario: Usuario) {
+        val db = FirebaseFirestore.getInstance()
         db.collection("usuarios").document(usuario.uid).set(usuario)
+            .addOnSuccessListener {
+                Log.d("FirebaseHelper", "Usuario agregado exitosamente")
+            }
+            .addOnFailureListener {
+                Log.e("FirebaseHelper", "Error al agregar usuario: ${it.message}")
+            }
     }
+
 
     // Función para obtener los datos de un usuario
     fun obtenerUsuario(uid: String, callback: (Usuario?) -> Unit) {

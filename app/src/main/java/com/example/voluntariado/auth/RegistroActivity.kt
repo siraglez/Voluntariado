@@ -59,7 +59,7 @@ class RegistroActivity : AppCompatActivity() {
                     )
                     firebaseHelper.agregarUsuario(nuevoUsuario)
                     Toast.makeText(this, "Usuario registrado correctamente", Toast.LENGTH_SHORT).show()
-                    finish() // Regresa a la pantalla de inicio de sesión
+                    finish()
                 } else {
                     Toast.makeText(this, "Error al registrar usuario", Toast.LENGTH_SHORT).show()
                 }
