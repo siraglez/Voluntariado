@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/backgroundColor"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/tvAgregarActividad"
+        style="@style/TextPrimaryStyle"
+        android:text="Agregar Nueva Actividad"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:textSize="20sp"
+        android:layout_marginBottom="16dp" />
+
+    <EditText
+        android:id="@+id/etNombre"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:backgroundTint="@color/highlightColor"
+        android:hint="Nombre de la actividad"
+        android:minHeight="48dp"
+        android:textColor="@color/textColorPrimary" />
+
+    <EditText
+        android:id="@+id/etDescripcion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:backgroundTint="@color/highlightColor"
+        android:hint="Descripción"
+        android:minHeight="48dp"
+        android:textColor="@color/textColorPrimary" />
+
+    <EditText
+        android:id="@+id/etFecha"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:backgroundTint="@color/highlightColor"
+        android:hint="Fecha (YYYY-MM-DD)"
+        android:minHeight="48dp"
+        android:textColor="@color/textColorPrimary" />
+
+    <EditText
+        android:id="@+id/etVoluntariosMax"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="@color/highlightColor"
+        android:hint="Máximo de voluntarios"
+        android:minHeight="48dp"
+        android:textColor="@color/textColorPrimary" />
+
+    <Button
+        android:id="@+id/btnGuardar"
+        android:text="Guardar"
+        style="@style/ButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</LinearLayout>
+

@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="16dp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
     android:background="@android:color/white"
     android:layout_marginBottom="8dp">
 
     <TextView
-        android:id="@+id/actividadNombre"
+        android:id="@+id/tvNombreActividad"
+        style="@style/TextPrimaryStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Nombre de la actividad"
-        android:textColor="@color/textColorPrimary"
-        android:textSize="18sp"
-        android:fontFamily="sans-serif-medium"/>
+        android:text="Nombre de la Actividad"
+        android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/actividadDescripcion"
+        android:id="@+id/tvDescripcionActividad"
+        style="@style/TextSecondaryStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Descripción"
-        android:textColor="@color/textColorSecondary"
-        android:textSize="14sp" />
+        android:text="Descripción de la actividad"
+        android:layout_marginTop="4dp" />
 </LinearLayout>
+
 

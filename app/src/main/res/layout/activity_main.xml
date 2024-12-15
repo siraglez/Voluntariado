@@ -4,11 +4,21 @@
     android:layout_height="match_parent"
     android:background="@color/backgroundColor">
 
-    <!-- Fragmento para mostrar las actividades -->
+    <TextView
+        android:id="@+id/tvWelcome"
+        style="@style/TextPrimaryStyle"
+        android:text="Actividades Disponibles"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp" />
+
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragmentContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:name="com.example.voluntariado.view.ActividadVoluntariadoFragment" />
+        android:layout_below="@id/tvWelcome"
+        android:layout_marginTop="8dp" />
 </RelativeLayout>
+
 

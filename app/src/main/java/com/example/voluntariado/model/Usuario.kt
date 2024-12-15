@@ -4,7 +4,7 @@ data class Usuario(
     val uid: String = "",
     val nombre: String = "",
     val email: String = "",
-    val ubicacion: Map<String, Double> = mapOf(),
+    val ubicacion: String = "",
     val intereses: List<String> = listOf(),
     val inscripciones: List<String> = listOf()
 )
