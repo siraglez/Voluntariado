@@ -3,10 +3,10 @@ package com.example.voluntariado.view
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.voluntariado.R
@@ -31,33 +31,39 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Inicializar Firebase y Firestore
+        // Obtener el rol del usuario (admin o usuario normal)
+        val rol = intent.getStringExtra("ROL")
+
         auth = FirebaseAuth.getInstance()
         firebaseHelper = FirebaseHelper()
         firestore = FirebaseFirestore.getInstance()
 
-        // Configurar RecyclerView
         recyclerView = findViewById(R.id.recyclerViewActividades)
         recyclerView.layoutManager = LinearLayoutManager(this)
+        actividadAdapter = ActividadAdapter(listaActividades) { actividad ->
+            val intent = Intent(this, DetallesActividadActivity::class.java)
+            intent.putExtra("ACTIVIDAD_ID", actividad.id)
+            intent.putExtra("ROL", rol)
+            startActivity(intent)
+        }
+        recyclerView.adapter = actividadAdapter
 
-        // Identificar el rol del usuario
-        val rol = intent.getStringExtra("ROL")
+        // Mostrar la interfaz adecuada según el rol
         if (rol == "admin") {
             mostrarInterfazAdministrador()
         } else {
             mostrarInterfazUsuario()
         }
 
-        // Cargar lista de actividades desde Firestore
+        // Cargar las actividades desde Firestore
         cargarActividades(rol)
     }
 
     private fun mostrarInterfazAdministrador() {
-        // Configurar el fragmento para administradores
-        cargarFragment(ActividadVoluntariadoFragment())
-
-        // Configurar el botón para agregar actividades
+        // Mostrar el botón "Agregar Actividad" solo para administradores
         val btnAgregarActividad = findViewById<Button>(R.id.btnAgregarActividad)
+        btnAgregarActividad.visibility = View.VISIBLE
+
         btnAgregarActividad.setOnClickListener {
             val intent = Intent(this, AgregarActividadActivity::class.java)
             startActivity(intent)
@@ -65,14 +71,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun mostrarInterfazUsuario() {
-        // Configurar el fragmento para usuarios normales
-        cargarFragment(ActividadVoluntariadoFragment())
-    }
-
-    private fun cargarFragment(fragment: Fragment) {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainer, fragment)
-            .commit()
+        // Ocultar el botón "Agregar Actividad" para usuarios normales
+        val btnAgregarActividad = findViewById<Button>(R.id.btnAgregarActividad)
+        btnAgregarActividad.visibility = View.GONE
     }
 
     private fun cargarActividades(rol: String?) {

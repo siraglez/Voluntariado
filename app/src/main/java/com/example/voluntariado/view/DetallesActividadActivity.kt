@@ -64,12 +64,11 @@ class DetallesActividadActivity : AppCompatActivity() {
     private fun obtenerDetallesActividad(actividadId: String) {
         firebaseHelper.obtenerActividadPorId(actividadId) { actividad ->
             if (actividad != null) {
-                // Acceder al campo correctamente
-                val maxVoluntarios = actividad.voluntariosMax
                 // Mostrar el valor de voluntariosMax
+                val maxVoluntarios = actividad.voluntariosMax
                 tvVoluntariosMax.text = "Voluntarios Máximos: $maxVoluntarios"
 
-                // Actualizar los demás campos
+                // Mostrar otros detalles
                 tvNombre.text = "Nombre: ${actividad.nombre}"
                 tvCategoria.text = "Categoría: ${actividad.categoria}"
                 tvDescripcion.text = "Descripción: ${actividad.descripcion}"
@@ -78,7 +77,7 @@ class DetallesActividadActivity : AppCompatActivity() {
                 tvUbicacion.text = "Ubicación: ${actividad.ubicacion}"
                 tvVoluntariosActuales.text = "Voluntarios Actuales: ${actividad.voluntariosActuales}"
 
-                // Mostrar inscritos si hay alguna persona inscrita
+                // Mostrar los usuarios inscritos
                 if (actividad.inscritos.isNotEmpty()) {
                     tvInscritos.text = "Usuarios inscritos: ${actividad.inscritos.joinToString(", ")}"
                     tvInscritos.visibility = View.VISIBLE
@@ -102,7 +101,6 @@ class DetallesActividadActivity : AppCompatActivity() {
     }
 
     private fun inscribirseEnActividad(actividad: Actividad) {
-        // Lógica para inscribirse en la actividad
         val usuarioId = "current_user_id"
 
         // Actualizar la lista de inscritos en Firestore
