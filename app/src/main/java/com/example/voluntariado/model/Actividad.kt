@@ -1,7 +1,7 @@
 package com.example.voluntariado.model
 
 data class Actividad(
-    val id: String = "",
+    var id: String = "",
     val nombre: String = "",
     val descripcion: String = "",
     val fecha: String = "",

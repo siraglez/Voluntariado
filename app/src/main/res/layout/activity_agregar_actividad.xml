@@ -42,7 +42,27 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:backgroundTint="@color/highlightColor"
-        android:hint="Fecha (DD/MM/YYY)"
+        android:hint="Fecha (DD/MM/YYYY)"
+        android:minHeight="48dp"
+        android:textColor="@color/textColorPrimary" />
+
+    <EditText
+        android:id="@+id/etUbicacion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:backgroundTint="@color/highlightColor"
+        android:hint="Ubicación"
+        android:minHeight="48dp"
+        android:textColor="@color/textColorPrimary" />
+
+    <EditText
+        android:id="@+id/etCategoria"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:backgroundTint="@color/highlightColor"
+        android:hint="Categoría"
         android:minHeight="48dp"
         android:textColor="@color/textColorPrimary" />
 
@@ -50,9 +70,19 @@
         android:id="@+id/etVoluntariosMax"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="8dp"
         android:backgroundTint="@color/highlightColor"
         android:hint="Máximo de voluntarios"
+        android:minHeight="48dp"
+        android:textColor="@color/textColorPrimary" />
+
+    <EditText
+        android:id="@+id/etEstado"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="@color/highlightColor"
+        android:hint="Estado (e.g., Activa, Inactiva)"
         android:minHeight="48dp"
         android:textColor="@color/textColorPrimary" />
 
@@ -63,4 +93,3 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 </LinearLayout>
-
