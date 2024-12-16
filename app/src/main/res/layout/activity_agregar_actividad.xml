@@ -42,7 +42,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:backgroundTint="@color/highlightColor"
-        android:hint="Fecha (YYYY-MM-DD)"
+        android:hint="Fecha (DD/MM/YYY)"
         android:minHeight="48dp"
         android:textColor="@color/textColorPrimary" />
 

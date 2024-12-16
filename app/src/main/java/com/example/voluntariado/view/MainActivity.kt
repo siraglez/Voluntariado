@@ -31,6 +31,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Inicializar Firebase y Firestore
         auth = FirebaseAuth.getInstance()
         firebaseHelper = FirebaseHelper()
         firestore = FirebaseFirestore.getInstance()
@@ -38,8 +39,6 @@ class MainActivity : AppCompatActivity() {
         // Configurar RecyclerView
         recyclerView = findViewById(R.id.recyclerViewActividades)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        actividadAdapter = ActividadAdapter(listaActividades)
-        recyclerView.adapter = actividadAdapter
 
         // Identificar el rol del usuario
         val rol = intent.getStringExtra("ROL")
@@ -50,7 +49,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Cargar lista de actividades desde Firestore
-        cargarActividades()
+        cargarActividades(rol)
     }
 
     private fun mostrarInterfazAdministrador() {
@@ -76,17 +75,17 @@ class MainActivity : AppCompatActivity() {
             .commit()
     }
 
-    private fun cargarActividades() {
-        firestore.collection("actividades")
-            .get()
+    private fun cargarActividades(rol: String?) {
+        firestore.collection("actividades").get()
             .addOnSuccessListener { result ->
-                val nuevasActividades = mutableListOf<Actividad>()
-                for (document in result) {
-                    val actividad = document.toObject(Actividad::class.java)
-                    nuevasActividades.add(actividad)
+                val nuevasActividades = result.map { it.toObject(Actividad::class.java) }
+                actividadAdapter = ActividadAdapter(nuevasActividades) { actividad ->
+                    val intent = Intent(this, DetallesActividadActivity::class.java)
+                    intent.putExtra("ACTIVIDAD_ID", actividad.id)
+                    intent.putExtra("ROL", rol)
+                    startActivity(intent)
                 }
-                // Actualizar adaptador con las nuevas actividades
-                actividadAdapter.actualizarLista(nuevasActividades)
+                recyclerView.adapter = actividadAdapter
             }
             .addOnFailureListener { e ->
                 Toast.makeText(this, "Error al cargar actividades: ${e.message}", Toast.LENGTH_SHORT).show()

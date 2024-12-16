@@ -8,8 +8,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.voluntariado.R
 import com.example.voluntariado.model.Actividad
 
-class ActividadAdapter(private var listaActividades: List<Actividad>) :
-    RecyclerView.Adapter<ActividadAdapter.ActividadViewHolder>() {
+class ActividadAdapter(
+    private var listaActividades: List<Actividad>,
+    private val onClick: (Actividad) -> Unit
+) : RecyclerView.Adapter<ActividadAdapter.ActividadViewHolder>() {
 
     class ActividadViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvNombre: TextView = itemView.findViewById(R.id.tvNombreActividad)
@@ -26,6 +28,10 @@ class ActividadAdapter(private var listaActividades: List<Actividad>) :
         val actividad = listaActividades[position]
         holder.tvNombre.text = actividad.nombre
         holder.tvDescripcion.text = actividad.descripcion
+
+        holder.itemView.setOnClickListener {
+            onClick(actividad) // Manejar clic
+        }
     }
 
     override fun getItemCount(): Int = listaActividades.size

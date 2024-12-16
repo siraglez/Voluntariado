@@ -46,14 +46,16 @@
         android:id="@+id/tvInscritos"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Inscritos" />
+        android:text="Usuarios inscritos"
+        android:visibility="gone"/>
 
     <Button
         android:id="@+id/btnInscribirse"
         style="@style/ButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Inscribirse" />
+        android:text="Inscribirse"
+        android:visibility="gone"/>
 
     <Button
         android:id="@+id/btnVolver"

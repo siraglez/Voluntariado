@@ -1,6 +1,7 @@
 package com.example.voluntariado.view
 
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -46,7 +47,9 @@ class DetallesActividadActivity : AppCompatActivity() {
 
         // Obtener los detalles de la actividad desde el Intent
         val actividadId = intent.getStringExtra("ACTIVIDAD_ID") ?: return
-        obtenerDetallesActividad(actividadId)
+        val rol = intent.getStringExtra("ROL") ?: "usuario"
+
+        obtenerDetallesActividad(actividadId, rol)
 
         // Acción para inscribirse
         btnInscribirse.setOnClickListener {
@@ -64,14 +67,12 @@ class DetallesActividadActivity : AppCompatActivity() {
         }
     }
 
-    private fun obtenerDetallesActividad(id: String) {
-        FirebaseFirestore.getInstance().collection("actividades")
-            .document(id)
-            .get()
+    private fun obtenerDetallesActividad(id: String, rol: String) {
+        FirebaseFirestore.getInstance().collection("actividades").document(id).get()
             .addOnSuccessListener { document ->
                 if (document != null && document.exists()) {
                     actividad = document.toObject(Actividad::class.java)!!
-                    cargarDetallesActividad()
+                    cargarDetallesActividad(rol)
                 } else {
                     Toast.makeText(this, "Actividad no encontrada", Toast.LENGTH_SHORT).show()
                     finish()
@@ -83,50 +84,54 @@ class DetallesActividadActivity : AppCompatActivity() {
             }
     }
 
-    private fun cargarDetallesActividad() {
+    private fun cargarDetallesActividad(rol: String) {
         tvCategoria.text = actividad.categoria
         tvDescripcion.text = actividad.descripcion
         tvFecha.text = actividad.fecha
         tvUbicacion.text = actividad.ubicacion
         tvVoluntariosActuales.text = actividad.voluntariosActuales.toString()
         tvVoluntariosMax.text = actividad.voluntariosMax.toString()
-        tvInscritos.text = actividad.inscritos.joinToString(", ")
+
+        // Mostrar inscritos solo para el admin
+        if (rol == "admin") {
+            tvInscritos.text = actividad.inscritos.joinToString(", ")
+        } else {
+            tvInscritos.visibility = View.GONE // Ocultar para usuarios normales
+        }
+
+        btnInscribirse.visibility = if (rol == "usuario" && actividad.voluntariosActuales < actividad.voluntariosMax) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
     }
 
     private fun inscribirseEnActividad(usuarioId: String) {
         if (actividad.voluntariosActuales < actividad.voluntariosMax) {
             val db = FirebaseFirestore.getInstance()
 
-            // Actualizar el array de inscritos y voluntarios_actuales en la actividad
             val nuevosInscritos = actividad.inscritos.toMutableList()
             nuevosInscritos.add(usuarioId)
 
             db.collection("actividades").document(actividad.id)
-                .update(
-                    "inscritos", nuevosInscritos,
-                    "voluntarios_actuales", actividad.voluntariosActuales + 1
-                ).addOnSuccessListener {
-                    // Crear una nueva inscripción en la colección `inscripciones`
+                .update("inscritos", nuevosInscritos, "voluntariosActuales", actividad.voluntariosActuales + 1)
+                .addOnSuccessListener {
                     val nuevaInscripcion = Inscripcion(
-                        actividadId = "/actividades/${actividad.id}",
-                        usuarioId = "/usuarios/$usuarioId",
+                        actividadId = actividad.id,
+                        usuarioId = usuarioId,
                         estado = "Confirmada",
                         fechaInscripcion = getCurrentDate()
                     )
                     db.collection("inscripciones").add(nuevaInscripcion)
-                        .addOnSuccessListener {
-                            db.collection("usuarios").document(usuarioId)
-                                .update("inscripciones", FieldValue.arrayUnion(it.id))
-                                .addOnSuccessListener {
-                                    Toast.makeText(this, "Te has inscrito correctamente", Toast.LENGTH_SHORT).show()
-                                }
-                        }
-                        .addOnFailureListener {
-                            Toast.makeText(this, "Error al guardar la inscripción", Toast.LENGTH_SHORT).show()
-                        }
+                    db.collection("usuarios").document(usuarioId).update(
+                        "inscripciones", FieldValue.arrayUnion(actividad.id)
+                    ).addOnSuccessListener {
+                        Toast.makeText(this, "Te has inscrito correctamente", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
                 }
                 .addOnFailureListener {
-                    Toast.makeText(this, "Error al actualizar la actividad", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Error al inscribirse", Toast.LENGTH_SHORT).show()
                 }
         } else {
             Toast.makeText(this, "No hay más espacio en esta actividad", Toast.LENGTH_SHORT).show()
@@ -135,7 +140,7 @@ class DetallesActividadActivity : AppCompatActivity() {
 
     // Función auxiliar para obtener la fecha actual
     private fun getCurrentDate(): String {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("dd-MM-yyy", Locale.getDefault())
         return dateFormat.format(Date())
     }
 }
