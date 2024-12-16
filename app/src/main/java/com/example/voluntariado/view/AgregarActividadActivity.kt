@@ -28,7 +28,6 @@ class AgregarActividadActivity : AppCompatActivity() {
 
         firebaseHelper = FirebaseHelper()
 
-        // Vincular vistas
         nombreInput = findViewById(R.id.etNombre)
         descripcionInput = findViewById(R.id.etDescripcion)
         fechaInput = findViewById(R.id.etFecha)
@@ -75,10 +74,11 @@ class AgregarActividadActivity : AppCompatActivity() {
             inscritos = emptyList() // Por defecto, vacío
         )
 
-        // Guardar actividad con ID secuencial
+        // Guardar actividad con ID secuencial y actualizar la lista automáticamente
         firebaseHelper.agregarActividadConIdSecuencial(nuevaActividad) { exito ->
             if (exito) {
                 Toast.makeText(this, "Actividad agregada correctamente", Toast.LENGTH_SHORT).show()
+                setResult(RESULT_OK)
                 finish()
             } else {
                 Toast.makeText(this, "Error al agregar la actividad", Toast.LENGTH_SHORT).show()

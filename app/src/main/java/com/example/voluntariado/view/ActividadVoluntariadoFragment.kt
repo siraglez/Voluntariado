@@ -1,11 +1,12 @@
 package com.example.voluntariado.view
 
+import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,7 +20,9 @@ class ActividadVoluntariadoFragment : Fragment() {
     private lateinit var firebaseHelper: FirebaseHelper
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ActividadAdapter
+    private val listaActividades = mutableListOf<Actividad>()
 
+    @SuppressLint("MissingInflatedId")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -31,35 +34,47 @@ class ActividadVoluntariadoFragment : Fragment() {
 
         firebaseHelper = FirebaseHelper()
 
-        // Cargar actividades desde Firestore
+        // Cargar las actividades desde Firebase
         cargarActividades()
+
+        // Botón de agregar actividad
+        val btnAgregarActividad: View = view.findViewById(R.id.btnAgregarActividad)
+        btnAgregarActividad.setOnClickListener {
+            val intent = Intent(requireContext(), AgregarActividadActivity::class.java)
+            startActivityForResult(intent, 1)
+        }
 
         return view
     }
 
     private fun cargarActividades() {
         firebaseHelper.obtenerActividades { actividades ->
-            if (actividades.isNotEmpty()) {
-                configurarAdaptador(actividades)
+            // Actualizar la lista de actividades y el adaptador
+            listaActividades.clear()
+            listaActividades.addAll(actividades)
+            if (::adapter.isInitialized) {
+                adapter.notifyDataSetChanged() // Notificar al adaptador que los datos han cambiado
             } else {
-                Toast.makeText(requireContext(), "No hay actividades disponibles", Toast.LENGTH_SHORT).show()
+                // Inicializa el adaptador si aún no se ha creado
+                adapter = ActividadAdapter(actividades) { actividad ->
+                    mostrarDetallesActividad(actividad)
+                }
+                recyclerView.adapter = adapter
             }
         }
     }
 
-    private fun configurarAdaptador(actividades: List<Actividad>) {
-        // Crear el adaptador y configurar los clics en las actividades
-        adapter = ActividadAdapter(actividades) { actividad ->
-            mostrarDetallesActividad(actividad)
-        }
-        recyclerView.adapter = adapter
-    }
-
     private fun mostrarDetallesActividad(actividad: Actividad) {
-        // Redirigir al usuario a la pantalla de detalles de la actividad
         val intent = Intent(requireContext(), DetallesActividadActivity::class.java)
         intent.putExtra("ACTIVIDAD_ID", actividad.id)
-        intent.putExtra("ROL", requireActivity().intent.getStringExtra("ROL"))
         startActivity(intent)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
+            // Cuando se ha agregado una actividad, recargar la lista
+            cargarActividades()
+        }
     }
 }
