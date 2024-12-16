@@ -2,9 +2,7 @@ package com.example.voluntariado.auth
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.voluntariado.R
 import com.example.voluntariado.view.MainActivity
@@ -20,46 +18,55 @@ class LoginActivity : AppCompatActivity() {
 
         firestore = FirebaseFirestore.getInstance()
 
+        // Inicializar vistas
         val etEmail = findViewById<EditText>(R.id.etEmail)
         val etPassword = findViewById<EditText>(R.id.etPassword)
         val btnLogin = findViewById<Button>(R.id.btnLogin)
+        val btnRegister = findViewById<Button>(R.id.btnRegister)
 
+        // Botón de Iniciar Sesión
         btnLogin.setOnClickListener {
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
 
-            if (email.isNotEmpty() && password.isNotEmpty()) {
-                iniciarSesion(email, password)
-            } else {
+            if (email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "Por favor, completa todos los campos", Toast.LENGTH_SHORT).show()
+            } else {
+                iniciarSesion(email, password)
             }
+        }
+
+        // Botón de Registrar
+        btnRegister.setOnClickListener {
+            val intent = Intent(this, RegistroActivity::class.java)
+            startActivity(intent)
         }
     }
 
     private fun iniciarSesion(email: String, password: String) {
-        // Buscar el usuario por email en Firestore
-        firestore.collection("usuarios").document(email)
+        // Buscar el usuario por el campo 'email' en Firestore
+        firestore.collection("usuarios")
+            .whereEqualTo("email", email)
             .get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
+            .addOnSuccessListener { documents ->
+                if (!documents.isEmpty) {
+                    val document = documents.documents[0]
                     val contrasenaGuardada = document.getString("contrasena")
                     val rol = document.getString("rol")
 
-                    // Verificar la contraseña
                     if (contrasenaGuardada == password) {
                         // Redirigir según el rol
-                        if (rol == "admin") {
-                            Toast.makeText(this, "Bienvenido Admin", Toast.LENGTH_SHORT).show()
-                            val intent = Intent(this, MainActivity::class.java)
-                            intent.putExtra("ROL", "admin")
-                            startActivity(intent)
-                        } else {
-                            Toast.makeText(this, "Bienvenido Usuario", Toast.LENGTH_SHORT).show()
-                            val intent = Intent(this, MainActivity::class.java)
-                            intent.putExtra("ROL", "usuario")
-                            startActivity(intent)
+                        when (rol) {
+                            "admin" -> {
+                                Toast.makeText(this, "Bienvenido Admin", Toast.LENGTH_SHORT).show()
+                                navegarMainActivity("admin")
+                            }
+                            "usuario" -> {
+                                Toast.makeText(this, "Bienvenido Usuario", Toast.LENGTH_SHORT).show()
+                                navegarMainActivity("usuario")
+                            }
+                            else -> Toast.makeText(this, "Rol desconocido", Toast.LENGTH_SHORT).show()
                         }
-                        finish()
                     } else {
                         Toast.makeText(this, "Contraseña incorrecta", Toast.LENGTH_SHORT).show()
                     }
@@ -68,7 +75,14 @@ class LoginActivity : AppCompatActivity() {
                 }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "Error al iniciar sesión: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
             }
+    }
+
+    private fun navegarMainActivity(rol: String) {
+        val intent = Intent(this, MainActivity::class.java)
+        intent.putExtra("ROL", rol)
+        startActivity(intent)
+        finish()
     }
 }
