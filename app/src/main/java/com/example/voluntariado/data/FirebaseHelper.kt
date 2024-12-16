@@ -37,7 +37,46 @@ class FirebaseHelper {
 
     // Función para agregar una actividad
     fun agregarActividad(actividad: Actividad) {
-        db.collection("actividades").document(actividad.id).set(actividad)
+        val db = FirebaseFirestore.getInstance()
+        val docRef = db.collection("actividades").document()
+        actividad.id = docRef.id
+        docRef.set(actividad)
+    }
+
+    fun agregarActividadConIdSecuencial(nuevaActividad: Actividad, callback: (Boolean) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+
+        // Consulta todas las actividades para encontrar el último ID
+        db.collection("actividades")
+            .orderBy("id") // Asegura que las actividades estén ordenadas por el campo "id"
+            .get()
+            .addOnSuccessListener { documentos ->
+                val ultimoId = documentos.documents.lastOrNull()?.getString("id")
+                val nuevoId = if (ultimoId != null) {
+                    // Incrementa el último ID
+                    val nuevoNumero = ultimoId.toInt() + 1
+                    String.format("%03d", nuevoNumero)
+                } else {
+                    "001" // Si no hay actividades, comienza con 001
+                }
+
+                // Asigna el nuevo ID a la actividad
+                nuevaActividad.id = nuevoId
+
+                // Guarda la actividad con el nuevo ID
+                db.collection("actividades").document(nuevoId).set(nuevaActividad)
+                    .addOnSuccessListener {
+                        callback(true) // Operación exitosa
+                    }
+                    .addOnFailureListener { e ->
+                        e.printStackTrace()
+                        callback(false) // Error al guardar
+                    }
+            }
+            .addOnFailureListener { e ->
+                e.printStackTrace()
+                callback(false) // Error al consultar las actividades
+            }
     }
 
     // Función para obtener una lista de actividades
