@@ -50,6 +50,13 @@
             android:label="@string/detalles_actividad"
             android:theme="@style/AppTheme" />
 
+        <!-- AgregarActividadActivity para agregar nuevas actividades -->
+        <activity
+            android:name=".view.AgregarActividadActivity"
+            android:exported="false"
+            android:label="@string/agregar_actividad"
+            android:theme="@style/AppTheme" />
+
     </application>
 
 </manifest>

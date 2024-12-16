@@ -3,4 +3,5 @@
     <string name="inicio_sesion">Inicio de Sesión</string>
     <string name="registro">Registro</string>
     <string name="detalles_actividad">Detalles de la Actividad</string>
+    <string name="agregar_actividad">Agregar Nueva Actividad</string>
 </resources>
