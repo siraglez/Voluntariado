@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.voluntariado.R
+import com.example.voluntariado.adapter.ActividadAdapter
 import com.example.voluntariado.data.FirebaseHelper
 
 class ActividadVoluntariadoFragment : Fragment() {

@@ -4,6 +4,7 @@
     android:layout_height="match_parent"
     android:background="@color/backgroundColor">
 
+    <!-- Título de bienvenida -->
     <TextView
         android:id="@+id/tvWelcome"
         style="@style/TextPrimaryStyle"
@@ -13,20 +14,31 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp" />
 
+    <!-- Contenedor de fragmentos -->
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragmentContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_below="@id/tvWelcome"
+        android:name="com.example.voluntariado.view.ActividadVoluntariadoFragment"
+        android:layout_marginTop="8dp" />
+
+
+    <!-- Lista de actividades -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewActividades"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_below="@id/fragmentContainer"
         android:layout_above="@id/btnAgregarActividad"
         android:layout_marginTop="8dp" />
 
+    <!-- Botón para agregar actividades -->
     <Button
         android:id="@+id/btnAgregarActividad"
         android:text="Agregar Nueva Actividad"
         style="@style/ButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"/>
+        android:layout_alignParentBottom="true" />
 </RelativeLayout>
-

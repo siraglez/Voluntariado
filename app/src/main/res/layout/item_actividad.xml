@@ -3,25 +3,25 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@android:color/white"
-    android:layout_marginBottom="8dp">
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/tvNombreActividad"
         style="@style/TextPrimaryStyle"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Nombre de la Actividad"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:textSize="18sp" />
 
     <TextView
         android:id="@+id/tvDescripcionActividad"
         style="@style/TextSecondaryStyle"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Descripción de la actividad"
-        android:layout_marginTop="4dp" />
+        android:text="Descripción de la Actividad"
+        android:textSize="14sp" />
 </LinearLayout>
+
 
 
