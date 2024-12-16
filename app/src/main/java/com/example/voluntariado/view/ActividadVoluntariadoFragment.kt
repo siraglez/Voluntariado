@@ -1,6 +1,5 @@
 package com.example.voluntariado.view
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -21,8 +20,8 @@ class ActividadVoluntariadoFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ActividadAdapter
     private val listaActividades = mutableListOf<Actividad>()
+    private lateinit var tvEmptyState: View
 
-    @SuppressLint("MissingInflatedId")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -32,12 +31,14 @@ class ActividadVoluntariadoFragment : Fragment() {
         recyclerView = view.findViewById(R.id.recyclerViewActividades)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
+        tvEmptyState = view.findViewById(R.id.tvEmptyState)
+
         firebaseHelper = FirebaseHelper()
 
         // Cargar las actividades desde Firebase
         cargarActividades()
 
-        // Botón de agregar actividad
+        // Configurar el botón de agregar actividad
         val btnAgregarActividad: View = view.findViewById(R.id.btnAgregarActividad)
         btnAgregarActividad.setOnClickListener {
             val intent = Intent(requireContext(), AgregarActividadActivity::class.java)
@@ -49,17 +50,25 @@ class ActividadVoluntariadoFragment : Fragment() {
 
     private fun cargarActividades() {
         firebaseHelper.obtenerActividades { actividades ->
-            // Actualizar la lista de actividades y el adaptador
             listaActividades.clear()
             listaActividades.addAll(actividades)
-            if (::adapter.isInitialized) {
-                adapter.notifyDataSetChanged() // Notificar al adaptador que los datos han cambiado
-            } else {
-                // Inicializa el adaptador si aún no se ha creado
-                adapter = ActividadAdapter(actividades) { actividad ->
-                    mostrarDetallesActividad(actividad)
+
+            // Si hay actividades, muestra el RecyclerView y oculta el estado vacío
+            if (actividades.isNotEmpty()) {
+                recyclerView.visibility = View.VISIBLE
+                tvEmptyState.visibility = View.GONE
+                if (::adapter.isInitialized) {
+                    adapter.notifyDataSetChanged()
+                } else {
+                    adapter = ActividadAdapter(actividades) { actividad ->
+                        mostrarDetallesActividad(actividad)
+                    }
+                    recyclerView.adapter = adapter
                 }
-                recyclerView.adapter = adapter
+            } else {
+                // Si no hay actividades, muestra el estado vacío
+                recyclerView.visibility = View.GONE
+                tvEmptyState.visibility = View.VISIBLE
             }
         }
     }
@@ -73,7 +82,7 @@ class ActividadVoluntariadoFragment : Fragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
-            // Cuando se ha agregado una actividad, recargar la lista
+            // Recargar la lista cuando se haya agregado una nueva actividad
             cargarActividades()
         }
     }
