@@ -12,60 +12,63 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 class LoginActivity : AppCompatActivity() {
 
-    private lateinit var authHelper: AuthHelper
+    private lateinit var firestore: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        authHelper = AuthHelper()
+        firestore = FirebaseFirestore.getInstance()
 
+        val etEmail = findViewById<EditText>(R.id.etEmail)
+        val etPassword = findViewById<EditText>(R.id.etPassword)
         val btnLogin = findViewById<Button>(R.id.btnLogin)
-        val btnRegister = findViewById<Button>(R.id.btnRegister)
-        val emailInput = findViewById<EditText>(R.id.etEmail)
-        val passwordInput = findViewById<EditText>(R.id.etPassword)
 
         btnLogin.setOnClickListener {
-            val email = emailInput.text.toString()
-            val password = passwordInput.text.toString()
-            iniciarSesion(email, password)
-        }
+            val email = etEmail.text.toString().trim()
+            val password = etPassword.text.toString().trim()
 
-        btnRegister.setOnClickListener {
-            val intent = Intent(this, RegistroActivity::class.java)
-            startActivity(intent)
+            if (email.isNotEmpty() && password.isNotEmpty()) {
+                iniciarSesion(email, password)
+            } else {
+                Toast.makeText(this, "Por favor, completa todos los campos", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
     private fun iniciarSesion(email: String, password: String) {
-        authHelper.iniciarSesion(email, password) { user ->
-            if (user != null) {
-                FirebaseFirestore.getInstance().collection("usuarios")
-                    .document(user.uid)
-                    .get()
-                    .addOnSuccessListener { document ->
-                        if (document != null && document.exists()) {
-                            val rol = document.getString("rol")
-                            if (rol == "admin") {
-                                val intent = Intent(this, MainActivity::class.java)
-                                intent.putExtra("ROL", "admin")
-                                startActivity(intent)
-                            } else {
-                                val intent = Intent(this, MainActivity::class.java)
-                                intent.putExtra("ROL", "usuario")
-                                startActivity(intent)
-                            }
-                            finish()
+        // Buscar el usuario por email en Firestore
+        firestore.collection("usuarios").document(email)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val contrasenaGuardada = document.getString("contrasena")
+                    val rol = document.getString("rol")
+
+                    // Verificar la contraseña
+                    if (contrasenaGuardada == password) {
+                        // Redirigir según el rol
+                        if (rol == "admin") {
+                            Toast.makeText(this, "Bienvenido Admin", Toast.LENGTH_SHORT).show()
+                            val intent = Intent(this, MainActivity::class.java)
+                            intent.putExtra("ROL", "admin")
+                            startActivity(intent)
                         } else {
-                            Toast.makeText(this, "Usuario no encontrado en Firestore", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "Bienvenido Usuario", Toast.LENGTH_SHORT).show()
+                            val intent = Intent(this, MainActivity::class.java)
+                            intent.putExtra("ROL", "usuario")
+                            startActivity(intent)
                         }
+                        finish()
+                    } else {
+                        Toast.makeText(this, "Contraseña incorrecta", Toast.LENGTH_SHORT).show()
                     }
-                    .addOnFailureListener {
-                        Toast.makeText(this, "Error al verificar el rol del usuario", Toast.LENGTH_SHORT).show()
-                    }
-            } else {
-                Toast.makeText(this, "Error al iniciar sesión", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Usuario no encontrado", Toast.LENGTH_SHORT).show()
+                }
             }
-        }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Error al iniciar sesión: ${e.message}", Toast.LENGTH_LONG).show()
+            }
     }
 }
