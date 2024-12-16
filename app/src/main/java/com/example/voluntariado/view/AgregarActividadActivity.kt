@@ -50,13 +50,19 @@ class AgregarActividadActivity : AppCompatActivity() {
         val fecha = fechaInput.text.toString().trim()
         val ubicacion = ubicacionInput.text.toString().trim()
         val categoria = categoriaInput.text.toString().trim()
-        val maxVoluntarios = maxVoluntariosInput.text.toString().trim()
+        val maxVoluntarios = maxVoluntariosInput.text.toString().trim().toIntOrNull() ?: 0
         val estado = estadoInput.text.toString().trim()
 
         // Validar campos obligatorios
         if (nombre.isEmpty() || descripcion.isEmpty() || fecha.isEmpty() || ubicacion.isEmpty() ||
-            categoria.isEmpty() || maxVoluntarios.isEmpty() || estado.isEmpty()) {
+            categoria.isEmpty() || estado.isEmpty()) {
             Toast.makeText(this, "Por favor, completa todos los campos", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Validar que maxVoluntarios sea mayor que 0
+        if (maxVoluntarios <= 0) {
+            Toast.makeText(this, "El número de voluntarios máximos debe ser mayor que 0", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -68,10 +74,10 @@ class AgregarActividadActivity : AppCompatActivity() {
             fecha = fecha,
             ubicacion = ubicacion,
             categoria = categoria,
-            voluntariosMax = maxVoluntarios.toIntOrNull() ?: 0,
-            voluntariosActuales = 0, // Por defecto, 0
+            voluntariosMax = maxVoluntarios,
+            voluntariosActuales = 0, // Inicialmente, 0
             estado = estado,
-            inscritos = emptyList() // Por defecto, vacío
+            inscritos = emptyList() // Inicialmente, vacío
         )
 
         // Guardar actividad con ID secuencial y actualizar la lista automáticamente

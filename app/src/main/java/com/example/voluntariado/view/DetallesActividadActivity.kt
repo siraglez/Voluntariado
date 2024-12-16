@@ -31,7 +31,6 @@ class DetallesActividadActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detalles_actividad)
 
-        // Inicializar las vistas
         tvNombre = findViewById(R.id.tvNombre)
         tvCategoria = findViewById(R.id.tvCategoria)
         tvDescripcion = findViewById(R.id.tvDescripcion)
@@ -44,7 +43,6 @@ class DetallesActividadActivity : AppCompatActivity() {
         btnInscribirse = findViewById(R.id.btnInscribirse)
         btnVolver = findViewById(R.id.btnVolver)
 
-        // Inicializar FirebaseHelper
         firebaseHelper = FirebaseHelper()
 
         // Obtener el ID de la actividad desde el Intent
@@ -67,6 +65,11 @@ class DetallesActividadActivity : AppCompatActivity() {
     private fun obtenerDetallesActividad(actividadId: String) {
         firebaseHelper.obtenerActividadPorId(actividadId) { actividad ->
             if (actividad != null) {
+                // Verificar si el valor de voluntariosMax está correctamente recuperado
+                if (actividad.voluntariosMax == 0) {
+                    Toast.makeText(this, "El número de voluntarios máximos es incorrecto.", Toast.LENGTH_SHORT).show()
+                }
+
                 // Actualizar los TextViews con los datos de la actividad
                 tvNombre.text = "Nombre: ${actividad.nombre}"
                 tvCategoria.text = "Categoría: ${actividad.categoria}"
