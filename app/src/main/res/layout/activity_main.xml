@@ -18,7 +18,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/tvWelcome"
+        android:layout_above="@id/btnAgregarActividad"
         android:layout_marginTop="8dp" />
-</RelativeLayout>
 
+    <Button
+        android:id="@+id/btnAgregarActividad"
+        android:text="Agregar Nueva Actividad"
+        style="@style/ButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"/>
+</RelativeLayout>
 
