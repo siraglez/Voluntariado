@@ -12,7 +12,6 @@ import com.example.voluntariado.model.Actividad
 
 class DetallesActividadActivity : AppCompatActivity() {
 
-    // Referencias a las vistas
     private lateinit var tvNombre: TextView
     private lateinit var tvCategoria: TextView
     private lateinit var tvDescripcion: TextView
@@ -65,12 +64,12 @@ class DetallesActividadActivity : AppCompatActivity() {
     private fun obtenerDetallesActividad(actividadId: String) {
         firebaseHelper.obtenerActividadPorId(actividadId) { actividad ->
             if (actividad != null) {
-                // Verificar si el valor de voluntariosMax está correctamente recuperado
-                if (actividad.voluntariosMax == 0) {
-                    Toast.makeText(this, "El número de voluntarios máximos es incorrecto.", Toast.LENGTH_SHORT).show()
-                }
+                // Acceder al campo correctamente
+                val maxVoluntarios = actividad.voluntariosMax
+                // Mostrar el valor de voluntariosMax
+                tvVoluntariosMax.text = "Voluntarios Máximos: $maxVoluntarios"
 
-                // Actualizar los TextViews con los datos de la actividad
+                // Actualizar los demás campos
                 tvNombre.text = "Nombre: ${actividad.nombre}"
                 tvCategoria.text = "Categoría: ${actividad.categoria}"
                 tvDescripcion.text = "Descripción: ${actividad.descripcion}"
@@ -78,7 +77,6 @@ class DetallesActividadActivity : AppCompatActivity() {
                 tvFecha.text = "Fecha: ${actividad.fecha}"
                 tvUbicacion.text = "Ubicación: ${actividad.ubicacion}"
                 tvVoluntariosActuales.text = "Voluntarios Actuales: ${actividad.voluntariosActuales}"
-                tvVoluntariosMax.text = "Voluntarios Máximos: ${actividad.voluntariosMax}"
 
                 // Mostrar inscritos si hay alguna persona inscrita
                 if (actividad.inscritos.isNotEmpty()) {
@@ -104,6 +102,7 @@ class DetallesActividadActivity : AppCompatActivity() {
     }
 
     private fun inscribirseEnActividad(actividad: Actividad) {
+        // Lógica para inscribirse en la actividad
         val usuarioId = "current_user_id"
 
         // Actualizar la lista de inscritos en Firestore
