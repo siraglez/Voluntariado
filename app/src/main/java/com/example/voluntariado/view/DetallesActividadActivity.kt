@@ -7,140 +7,112 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.voluntariado.R
+import com.example.voluntariado.data.FirebaseHelper
 import com.example.voluntariado.model.Actividad
-import com.example.voluntariado.model.Inscripcion
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class DetallesActividadActivity : AppCompatActivity() {
 
-    private lateinit var actividad: Actividad
-    private lateinit var btnInscribirse: Button
-    private lateinit var btnVolver: Button
+    // Referencias a las vistas
+    private lateinit var tvNombre: TextView
     private lateinit var tvCategoria: TextView
     private lateinit var tvDescripcion: TextView
+    private lateinit var tvEstado: TextView
     private lateinit var tvFecha: TextView
     private lateinit var tvUbicacion: TextView
     private lateinit var tvVoluntariosActuales: TextView
     private lateinit var tvVoluntariosMax: TextView
     private lateinit var tvInscritos: TextView
+    private lateinit var btnInscribirse: Button
+    private lateinit var btnVolver: Button
+
+    private lateinit var firebaseHelper: FirebaseHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detalles_actividad)
 
-        // Referencias a los elementos de la UI
+        // Inicializar las vistas
+        tvNombre = findViewById(R.id.tvNombre)
         tvCategoria = findViewById(R.id.tvCategoria)
         tvDescripcion = findViewById(R.id.tvDescripcion)
+        tvEstado = findViewById(R.id.tvEstado)
         tvFecha = findViewById(R.id.tvFecha)
         tvUbicacion = findViewById(R.id.tvUbicacion)
         tvVoluntariosActuales = findViewById(R.id.tvVoluntariosActuales)
         tvVoluntariosMax = findViewById(R.id.tvVoluntariosMax)
         tvInscritos = findViewById(R.id.tvInscritos)
-
         btnInscribirse = findViewById(R.id.btnInscribirse)
         btnVolver = findViewById(R.id.btnVolver)
 
-        // Obtener los detalles de la actividad desde el Intent
-        val actividadId = intent.getStringExtra("ACTIVIDAD_ID") ?: return
-        val rol = intent.getStringExtra("ROL") ?: "usuario"
+        // Inicializar FirebaseHelper
+        firebaseHelper = FirebaseHelper()
 
-        obtenerDetallesActividad(actividadId, rol)
+        // Obtener el ID de la actividad desde el Intent
+        val actividadId = intent.getStringExtra("ACTIVIDAD_ID")
 
-        // Acción para inscribirse
-        btnInscribirse.setOnClickListener {
-            val usuarioId = FirebaseAuth.getInstance().currentUser?.uid
-            if (usuarioId != null) {
-                inscribirseEnActividad(usuarioId)
-            } else {
-                Toast.makeText(this, "Debe iniciar sesión para inscribirse", Toast.LENGTH_SHORT).show()
-            }
+        if (actividadId != null) {
+            // Obtener los detalles de la actividad
+            obtenerDetallesActividad(actividadId)
+        } else {
+            Toast.makeText(this, "No se encontró la actividad", Toast.LENGTH_SHORT).show()
+            finish() // Finaliza la actividad si no se encontró el ID
         }
 
-        // Acción para volver a la lista
+        // Configurar el botón "Volver a la lista"
         btnVolver.setOnClickListener {
-            finish() // Vuelve a la actividad anterior
+            onBackPressed() // Volver a la actividad anterior
         }
     }
 
-    private fun obtenerDetallesActividad(id: String, rol: String) {
-        FirebaseFirestore.getInstance().collection("actividades").document(id).get()
-            .addOnSuccessListener { document ->
-                if (document != null && document.exists()) {
-                    actividad = document.toObject(Actividad::class.java)!!
-                    cargarDetallesActividad(rol)
+    private fun obtenerDetallesActividad(actividadId: String) {
+        firebaseHelper.obtenerActividadPorId(actividadId) { actividad ->
+            if (actividad != null) {
+                // Actualizar los TextViews con los datos de la actividad
+                tvNombre.text = "Nombre: ${actividad.nombre}"
+                tvCategoria.text = "Categoría: ${actividad.categoria}"
+                tvDescripcion.text = "Descripción: ${actividad.descripcion}"
+                tvEstado.text = "Estado: ${actividad.estado}"
+                tvFecha.text = "Fecha: ${actividad.fecha}"
+                tvUbicacion.text = "Ubicación: ${actividad.ubicacion}"
+                tvVoluntariosActuales.text = "Voluntarios Actuales: ${actividad.voluntariosActuales}"
+                tvVoluntariosMax.text = "Voluntarios Máximos: ${actividad.voluntariosMax}"
+
+                // Mostrar inscritos si hay alguna persona inscrita
+                if (actividad.inscritos.isNotEmpty()) {
+                    tvInscritos.text = "Usuarios inscritos: ${actividad.inscritos.joinToString(", ")}"
+                    tvInscritos.visibility = View.VISIBLE
                 } else {
-                    Toast.makeText(this, "Actividad no encontrada", Toast.LENGTH_SHORT).show()
-                    finish()
+                    tvInscritos.visibility = View.GONE
                 }
-            }
-            .addOnFailureListener {
-                Toast.makeText(this, "Error al obtener los detalles", Toast.LENGTH_SHORT).show()
-                finish()
-            }
-    }
 
-    private fun cargarDetallesActividad(rol: String) {
-        tvCategoria.text = actividad.categoria
-        tvDescripcion.text = actividad.descripcion
-        tvFecha.text = actividad.fecha
-        tvUbicacion.text = actividad.ubicacion
-        tvVoluntariosActuales.text = actividad.voluntariosActuales.toString()
-        tvVoluntariosMax.text = actividad.voluntariosMax.toString()
-
-        // Mostrar inscritos solo para el admin
-        if (rol == "admin") {
-            tvInscritos.text = actividad.inscritos.joinToString(", ")
-        } else {
-            tvInscritos.visibility = View.GONE // Ocultar para usuarios normales
-        }
-
-        btnInscribirse.visibility = if (rol == "usuario" && actividad.voluntariosActuales < actividad.voluntariosMax) {
-            View.VISIBLE
-        } else {
-            View.GONE
-        }
-    }
-
-    private fun inscribirseEnActividad(usuarioId: String) {
-        if (actividad.voluntariosActuales < actividad.voluntariosMax) {
-            val db = FirebaseFirestore.getInstance()
-
-            val nuevosInscritos = actividad.inscritos.toMutableList()
-            nuevosInscritos.add(usuarioId)
-
-            db.collection("actividades").document(actividad.id)
-                .update("inscritos", nuevosInscritos, "voluntariosActuales", actividad.voluntariosActuales + 1)
-                .addOnSuccessListener {
-                    val nuevaInscripcion = Inscripcion(
-                        actividadId = actividad.id,
-                        usuarioId = usuarioId,
-                        estado = "Confirmada",
-                        fechaInscripcion = getCurrentDate()
-                    )
-                    db.collection("inscripciones").add(nuevaInscripcion)
-                    db.collection("usuarios").document(usuarioId).update(
-                        "inscripciones", FieldValue.arrayUnion(actividad.id)
-                    ).addOnSuccessListener {
-                        Toast.makeText(this, "Te has inscrito correctamente", Toast.LENGTH_SHORT).show()
-                        finish()
+                // Si hay espacio, habilitar el botón de inscripción
+                if (actividad.voluntariosActuales < actividad.voluntariosMax) {
+                    btnInscribirse.visibility = View.VISIBLE
+                    btnInscribirse.setOnClickListener {
+                        inscribirseEnActividad(actividad)
                     }
+                } else {
+                    btnInscribirse.visibility = View.GONE
                 }
-                .addOnFailureListener {
-                    Toast.makeText(this, "Error al inscribirse", Toast.LENGTH_SHORT).show()
-                }
-        } else {
-            Toast.makeText(this, "No hay más espacio en esta actividad", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "No se pudo obtener la actividad", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
-    // Función auxiliar para obtener la fecha actual
-    private fun getCurrentDate(): String {
-        val dateFormat = SimpleDateFormat("dd-MM-yyy", Locale.getDefault())
-        return dateFormat.format(Date())
+    private fun inscribirseEnActividad(actividad: Actividad) {
+        val usuarioId = "current_user_id"
+
+        // Actualizar la lista de inscritos en Firestore
+        firebaseHelper.inscribirUsuarioEnActividad(actividad.id, usuarioId) { exito ->
+            if (exito) {
+                Toast.makeText(this, "Inscripción realizada con éxito", Toast.LENGTH_SHORT).show()
+                // Actualizar los voluntarios actuales
+                tvVoluntariosActuales.text = "Voluntarios Actuales: ${actividad.voluntariosActuales + 1}"
+                btnInscribirse.visibility = View.GONE // Ocultar el botón después de inscribirse
+            } else {
+                Toast.makeText(this, "Error al inscribirse", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 }

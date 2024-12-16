@@ -7,46 +7,76 @@
     android:padding="16dp">
 
     <TextView
+        android:id="@+id/tvNombre"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Nombre: "
+        android:textSize="15sp"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
         android:id="@+id/tvCategoria"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Categoría" />
+        android:text="Categoría: "
+        android:textSize="15sp"
+        android:layout_marginBottom="8dp"/>
 
     <TextView
         android:id="@+id/tvDescripcion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Descripción" />
+        android:text="Descripción: "
+        android:textSize="15sp"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:id="@+id/tvEstado"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Estado: "
+        android:textSize="15sp"
+        android:layout_marginBottom="8dp" />
 
     <TextView
         android:id="@+id/tvFecha"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Fecha" />
+        android:text="Fecha: "
+        android:textSize="15sp"
+        android:layout_marginBottom="8dp"/>
 
     <TextView
         android:id="@+id/tvUbicacion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Ubicación" />
+        android:text="Ubicación: "
+        android:textSize="15sp"
+        android:layout_marginBottom="8dp"/>
 
     <TextView
         android:id="@+id/tvVoluntariosActuales"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Voluntarios Actuales" />
+        android:text="Voluntarios Actuales: "
+        android:textSize="15sp"
+        android:layout_marginBottom="8dp"/>
 
     <TextView
         android:id="@+id/tvVoluntariosMax"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Voluntarios Máximos" />
+        android:text="Voluntarios Máximos: "
+        android:textSize="15sp"
+        android:layout_marginBottom="8dp"/>
 
     <TextView
         android:id="@+id/tvInscritos"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Usuarios inscritos"
+        android:text="Usuarios inscritos: "
+        android:textSize="15sp"
+        android:layout_marginBottom="8dp"
         android:visibility="gone"/>
 
     <Button

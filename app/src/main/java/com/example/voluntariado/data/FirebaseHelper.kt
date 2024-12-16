@@ -5,6 +5,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.example.voluntariado.model.Usuario
 import com.example.voluntariado.model.Actividad
 import com.example.voluntariado.model.Inscripcion
+import com.google.firebase.firestore.FieldValue
 
 class FirebaseHelper {
 
@@ -88,9 +89,37 @@ class FirebaseHelper {
             }
     }
 
+    fun obtenerActividadPorId(actividadId: String, callback: (Actividad?) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("actividades").document(actividadId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val actividad = document.toObject(Actividad::class.java)
+                    callback(actividad)
+                } else {
+                    callback(null)
+                }
+            }
+            .addOnFailureListener {
+                callback(null)
+            }
+    }
+
     // Función para inscribir a un usuario a una actividad
-    fun inscribirUsuario(inscripcion: Inscripcion) {
-        db.collection("inscripciones").document(inscripcion.usuarioId + "_" + inscripcion.actividadId).set(inscripcion)
+    fun inscribirUsuarioEnActividad(actividadId: String, usuarioId: String, callback: (Boolean) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val actividadRef = db.collection("actividades").document(actividadId)
+
+        // Actualizar la lista de inscritos
+        actividadRef.update("inscritos", FieldValue.arrayUnion(usuarioId),
+            "voluntariosActuales", FieldValue.increment(1))
+            .addOnSuccessListener {
+                callback(true) // Inscripción exitosa
+            }
+            .addOnFailureListener {
+                callback(false) // Error al inscribir
+            }
     }
 
     // Función para obtener las inscripciones de un usuario
