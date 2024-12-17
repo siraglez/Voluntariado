@@ -116,7 +116,7 @@ class DetallesActividadActivity : AppCompatActivity() {
         val usuarioId = firebaseHelper.obtenerUsuarioActualId()
 
         if (usuarioId != null) {
-            firebaseHelper.inscribirUsuarioEnActividad(actividadId, usuarioId) { exito ->
+            firebaseHelper.inscribirUsuarioEnActividad(actividad.id, usuarioId) { exito ->
                 if (exito) {
                     Toast.makeText(
                         this,

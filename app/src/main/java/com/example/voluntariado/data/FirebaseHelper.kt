@@ -113,19 +113,53 @@ class FirebaseHelper {
     }
 
     // Función para inscribir a un usuario a una actividad
-    fun inscribirUsuarioEnActividad(actividadId: String, usuarioId: String, callback: (Boolean) -> Unit) {
-        val db = FirebaseFirestore.getInstance()
-        val actividadRef = db.collection("actividades").document(actividadId)
+    fun inscribirUsuarioEnActividad(
+        actividadId: String,
+        usuarioId: String,
+        callback: (Boolean) -> Unit
+    ) {
+        val firestore = FirebaseFirestore.getInstance()
+        val actividadRef = firestore.collection("actividades").document(actividadId)
+        val usuarioRef = firestore.collection("usuarios").document(usuarioId)
+        val inscripcionRef = firestore.collection("inscripciones").document()
 
-        // Actualizar la lista de inscritos
-        actividadRef.update("inscritos", FieldValue.arrayUnion(usuarioId),
-            "voluntariosActuales", FieldValue.increment(1))
-            .addOnSuccessListener {
-                callback(true) // Inscripción exitosa
+        firestore.runTransaction { transaction ->
+            // 1. Actualizar "voluntariosActuales" y la lista "inscritos" en la colección "actividades"
+            val actividadSnapshot = transaction.get(actividadRef)
+            val actividad = actividadSnapshot.toObject(Actividad::class.java)
+
+            if (actividad != null) {
+                if (actividad.voluntariosActuales < actividad.voluntariosMax) {
+                    val nuevosVoluntariosActuales = actividad.voluntariosActuales + 1
+                    val nuevosInscritos = actividad.inscritos.toMutableList().apply { add(usuarioId) }
+
+                    transaction.update(actividadRef, "voluntariosActuales", nuevosVoluntariosActuales)
+                    transaction.update(actividadRef, "inscritos", nuevosInscritos)
+                } else {
+                    throw Exception("No hay espacio disponible en la actividad")
+                }
+            } else {
+                throw Exception("La actividad no existe")
             }
-            .addOnFailureListener {
-                callback(false) // Error al inscribir
-            }
+
+            // 2. Actualizar la colección "usuarios" con la actividad inscrita
+            val usuarioSnapshot = transaction.get(usuarioRef)
+            val inscripciones = usuarioSnapshot.get("inscripciones") as? List<String> ?: listOf()
+            val nuevasInscripciones = inscripciones.toMutableList().apply { add(actividadId) }
+            transaction.update(usuarioRef, "inscripciones", nuevasInscripciones)
+
+            // 3. Crear un nuevo documento en la colección "inscripciones"
+            val inscripcionData = hashMapOf(
+                "actividad_id" to actividadId,
+                "usuario_id" to usuarioId,
+                "fecha_inscripcion" to System.currentTimeMillis()
+            )
+            transaction.set(inscripcionRef, inscripcionData)
+        }.addOnSuccessListener {
+            callback(true) // La transacción fue exitosa
+        }.addOnFailureListener { e ->
+            callback(false) // Ocurrió un error
+        }
     }
 
     // Función para obtener las inscripciones de un usuario
