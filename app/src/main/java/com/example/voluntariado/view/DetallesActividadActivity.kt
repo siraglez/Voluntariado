@@ -25,11 +25,14 @@ class DetallesActividadActivity : AppCompatActivity() {
     private lateinit var btnVolver: Button
 
     private lateinit var firebaseHelper: FirebaseHelper
+    private lateinit var actividadId: String
+    private var rol: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detalles_actividad)
 
+        // Inicializar vistas
         tvNombre = findViewById(R.id.tvNombre)
         tvCategoria = findViewById(R.id.tvCategoria)
         tvDescripcion = findViewById(R.id.tvDescripcion)
@@ -44,31 +47,27 @@ class DetallesActividadActivity : AppCompatActivity() {
 
         firebaseHelper = FirebaseHelper()
 
-        // Obtener el ID de la actividad desde el Intent
-        val actividadId = intent.getStringExtra("ACTIVIDAD_ID")
+        // Obtener datos del Intent
+        actividadId = intent.getStringExtra("ACTIVIDAD_ID") ?: ""
+        rol = intent.getStringExtra("ROL")
 
-        if (actividadId != null) {
-            // Obtener los detalles de la actividad
-            obtenerDetallesActividad(actividadId)
+        if (actividadId.isNotEmpty()) {
+            obtenerDetallesActividad()
         } else {
             Toast.makeText(this, "No se encontró la actividad", Toast.LENGTH_SHORT).show()
-            finish() // Finaliza la actividad si no se encontró el ID
+            finish()
         }
 
-        // Configurar el botón "Volver a la lista"
+        // Botón "Volver"
         btnVolver.setOnClickListener {
-            onBackPressed() // Volver a la actividad anterior
+            onBackPressed()
         }
     }
 
-    private fun obtenerDetallesActividad(actividadId: String) {
+    private fun obtenerDetallesActividad() {
         firebaseHelper.obtenerActividadPorId(actividadId) { actividad ->
             if (actividad != null) {
-                // Mostrar el valor de voluntariosMax
-                val maxVoluntarios = actividad.voluntariosMax
-                tvVoluntariosMax.text = "Voluntarios Máximos: $maxVoluntarios"
-
-                // Mostrar otros detalles
+                // Mostrar detalles de la actividad
                 tvNombre.text = "Nombre: ${actividad.nombre}"
                 tvCategoria.text = "Categoría: ${actividad.categoria}"
                 tvDescripcion.text = "Descripción: ${actividad.descripcion}"
@@ -76,43 +75,63 @@ class DetallesActividadActivity : AppCompatActivity() {
                 tvFecha.text = "Fecha: ${actividad.fecha}"
                 tvUbicacion.text = "Ubicación: ${actividad.ubicacion}"
                 tvVoluntariosActuales.text = "Voluntarios Actuales: ${actividad.voluntariosActuales}"
+                tvVoluntariosMax.text = "Voluntarios Máximos: ${actividad.voluntariosMax}"
 
-                // Mostrar los usuarios inscritos
-                if (actividad.inscritos.isNotEmpty()) {
-                    tvInscritos.text = "Usuarios inscritos: ${actividad.inscritos.joinToString(", ")}"
-                    tvInscritos.visibility = View.VISIBLE
-                } else {
-                    tvInscritos.visibility = View.GONE
-                }
-
-                // Si hay espacio, habilitar el botón de inscripción
-                if (actividad.voluntariosActuales < actividad.voluntariosMax) {
-                    btnInscribirse.visibility = View.VISIBLE
-                    btnInscribirse.setOnClickListener {
-                        inscribirseEnActividad(actividad)
+                // Lógica según el rol
+                if (rol == "admin") {
+                    // Mostrar lista de usuarios inscritos para administradores
+                    if (actividad.inscritos.isNotEmpty()) {
+                        tvInscritos.text =
+                            "Usuarios inscritos: ${actividad.inscritos.joinToString(", ")}"
+                        tvInscritos.visibility = View.VISIBLE
+                    } else {
+                        tvInscritos.text = "No hay usuarios inscritos aún."
+                        tvInscritos.visibility = View.VISIBLE
                     }
-                } else {
+
+                    // Ocultar botón de inscripción para administradores
                     btnInscribirse.visibility = View.GONE
+                } else {
+                    // Ocultar lista de inscritos para usuarios normales
+                    tvInscritos.visibility = View.GONE
+
+                    // Mostrar botón de inscripción si hay espacio disponible
+                    if (actividad.voluntariosActuales < actividad.voluntariosMax) {
+                        btnInscribirse.visibility = View.VISIBLE
+                        btnInscribirse.setOnClickListener {
+                            inscribirseEnActividad(actividad)
+                        }
+                    } else {
+                        btnInscribirse.visibility = View.GONE
+                    }
                 }
             } else {
-                Toast.makeText(this, "No se pudo obtener la actividad", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "No se pudo cargar la actividad", Toast.LENGTH_SHORT).show()
+                finish()
             }
         }
     }
 
     private fun inscribirseEnActividad(actividad: Actividad) {
-        val usuarioId = "current_user_id"
+        val usuarioId = firebaseHelper.obtenerUsuarioActualId()
 
-        // Actualizar la lista de inscritos en Firestore
-        firebaseHelper.inscribirUsuarioEnActividad(actividad.id, usuarioId) { exito ->
-            if (exito) {
-                Toast.makeText(this, "Inscripción realizada con éxito", Toast.LENGTH_SHORT).show()
-                // Actualizar los voluntarios actuales
-                tvVoluntariosActuales.text = "Voluntarios Actuales: ${actividad.voluntariosActuales + 1}"
-                btnInscribirse.visibility = View.GONE // Ocultar el botón después de inscribirse
-            } else {
-                Toast.makeText(this, "Error al inscribirse", Toast.LENGTH_SHORT).show()
+        if (usuarioId != null) {
+            firebaseHelper.inscribirUsuarioEnActividad(actividadId, usuarioId) { exito ->
+                if (exito) {
+                    Toast.makeText(
+                        this,
+                        "Te has inscrito correctamente en la actividad",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    btnInscribirse.visibility = View.GONE
+                    tvVoluntariosActuales.text =
+                        "Voluntarios Actuales: ${actividad.voluntariosActuales + 1}"
+                } else {
+                    Toast.makeText(this, "Error al inscribirse", Toast.LENGTH_SHORT).show()
+                }
             }
+        } else {
+            Toast.makeText(this, "Usuario no autenticado", Toast.LENGTH_SHORT).show()
         }
     }
 }

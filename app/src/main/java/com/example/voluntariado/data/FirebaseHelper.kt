@@ -5,6 +5,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.example.voluntariado.model.Usuario
 import com.example.voluntariado.model.Actividad
 import com.example.voluntariado.model.Inscripcion
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 
 class FirebaseHelper {
@@ -34,6 +35,11 @@ class FirebaseHelper {
                     callback(null)
                 }
             }
+    }
+
+    fun obtenerUsuarioActualId(): String? {
+        // Comprueba si hay un usuario autenticado y devuelve su UID
+        return FirebaseAuth.getInstance().currentUser?.uid
     }
 
     // Función para agregar una actividad
