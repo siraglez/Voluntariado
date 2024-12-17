@@ -41,18 +41,6 @@ class ActividadVoluntariadoFragment : Fragment() {
         // Cargar las actividades desde Firebase
         cargarActividades()
 
-        // Configurar el botón de agregar actividad solo para administradores
-        val btnAgregarActividad: View = view.findViewById(R.id.btnAgregarActividad)
-        if (rol == "admin") {
-            btnAgregarActividad.visibility = View.VISIBLE
-            btnAgregarActividad.setOnClickListener {
-                val intent = Intent(requireContext(), AgregarActividadActivity::class.java)
-                startActivityForResult(intent, 1)
-            }
-        } else {
-            btnAgregarActividad.visibility = View.GONE
-        }
-
         return view
     }
 
