@@ -6,7 +6,6 @@ import com.example.voluntariado.model.Usuario
 import com.example.voluntariado.model.Actividad
 import com.example.voluntariado.model.Inscripcion
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FieldValue
 
 class FirebaseHelper {
 
@@ -109,6 +108,21 @@ class FirebaseHelper {
             }
             .addOnFailureListener {
                 callback(null)
+            }
+    }
+
+    fun obtenerActividadesEnTiempoReal(callback: (List<Actividad>) -> Unit) {
+        val firestore = FirebaseFirestore.getInstance()
+        firestore.collection("actividades")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null) {
+                    val actividades = snapshot.documents.mapNotNull { it.toObject(Actividad::class.java) }
+                    callback(actividades)
+                }
             }
     }
 

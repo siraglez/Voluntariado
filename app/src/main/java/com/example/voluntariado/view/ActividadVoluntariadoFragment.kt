@@ -45,7 +45,7 @@ class ActividadVoluntariadoFragment : Fragment() {
     }
 
     private fun cargarActividades() {
-        firebaseHelper.obtenerActividades { actividades ->
+        firebaseHelper.obtenerActividadesEnTiempoReal { actividades ->
             listaActividades.clear()
             listaActividades.addAll(actividades)
 
@@ -53,10 +53,12 @@ class ActividadVoluntariadoFragment : Fragment() {
             if (actividades.isNotEmpty()) {
                 recyclerView.visibility = View.VISIBLE
                 tvEmptyState.visibility = View.GONE
+
+                // Actualizar adaptador
                 if (::adapter.isInitialized) {
                     adapter.notifyDataSetChanged()
                 } else {
-                    adapter = ActividadAdapter(actividades) { actividad ->
+                    adapter = ActividadAdapter(listaActividades) { actividad ->
                         mostrarDetallesActividad(actividad)
                     }
                     recyclerView.adapter = adapter
